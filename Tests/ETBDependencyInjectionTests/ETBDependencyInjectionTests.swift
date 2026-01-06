@@ -9,19 +9,33 @@ import XCTest
 import ETBDependencyInjectionMacros
 
 let testMacros: [String: Macro.Type] = [
-    "stringify": StringifyMacro.self,
+    "Service": ServiceMacro.self,
 ]
 #endif
 
 final class ETBDependencyInjectionTests: XCTestCase {
-    func testMacro() throws {
+    func testConformDirectlyToService() throws {
         #if canImport(ETBDependencyInjectionMacros)
         assertMacroExpansion(
             """
-            #stringify(a + b)
+            @Service(MyServiceImpl.self)
+            class MyServiceImpl: Service {
+                required init(provider: any ServiceProvider) {
+                    
+                }
+            }
             """,
             expandedSource: """
-            (a + b, "a + b")
+            
+            class MyServiceImpl: Service {
+                required init(provider: any ServiceProvider) {
+                    
+                }
+            }
+
+            extension MyServiceImpl {
+                typealias Interface = MyServiceImpl
+            }
             """,
             macros: testMacros
         )
@@ -29,16 +43,33 @@ final class ETBDependencyInjectionTests: XCTestCase {
         throw XCTSkip("macros are only supported when running tests for the host platform")
         #endif
     }
-
-    func testMacroWithStringLiteral() throws {
+    
+    func testConformToSubTypeOfService() throws {
         #if canImport(ETBDependencyInjectionMacros)
         assertMacroExpansion(
-            #"""
-            #stringify("Hello, \(name)")
-            """#,
-            expandedSource: #"""
-            ("Hello, \(name)", #""Hello, \(name)""#)
-            """#,
+            """
+            protocol MyService: Service {}
+
+            @Service(MyService.self)
+            class MyServiceImpl2: MyService {
+                required init(provider: any ServiceProvider) {
+                    
+                }
+            }
+            """,
+            expandedSource: """
+            protocol MyService: Service {}
+
+            class MyServiceImpl2: MyService {
+                required init(provider: any ServiceProvider) {
+                    
+                }
+            }
+
+            extension MyServiceImpl2 {
+                typealias Interface = MyService
+            }
+            """,
             macros: testMacros
         )
         #else

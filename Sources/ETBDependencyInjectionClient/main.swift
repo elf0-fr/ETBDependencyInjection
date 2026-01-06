@@ -1,8 +1,27 @@
 import ETBDependencyInjection
 
-let a = 17
-let b = 25
 
-let (result, code) = #stringify(a + b)
+@Service(MyServiceImpl.self)
+class MyServiceImpl: Service {
+    required init(provider: any ServiceProvider) {
+        
+    }
+}
 
-print("The value \(result) was produced by the code \"\(code)\"")
+extension MyServiceImpl {
+    typealias Interface = MyServiceImpl
+}
+
+
+protocol MyService: Service {}
+
+@Service(MyService.self)
+class MyServiceImpl2: MyService {
+    required init(provider: any ServiceProvider) {
+        
+    }
+}
+
+extension MyServiceImpl2 {
+    typealias Interface = MyService
+}
