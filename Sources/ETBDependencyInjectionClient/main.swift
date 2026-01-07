@@ -38,3 +38,12 @@ public class MyServiceImpl4: Service {
         
     }
 }
+
+
+// MARK: 5
+@Service(MyServiceImpl5.self)
+public class MyServiceImpl5 {
+    public required init(provider: any ServiceProvider) {
+        
+    }
+}
