@@ -74,6 +74,30 @@ public struct ServiceMacro: MemberMacro {
     
 }
 
+extension ServiceMacro: ExtensionMacro {
+    
+    public static func expansion(
+        of node: SwiftSyntax.AttributeSyntax,
+        attachedTo declaration: some SwiftSyntax.DeclGroupSyntax,
+        providingExtensionsOf type: some SwiftSyntax.TypeSyntaxProtocol,
+        conformingTo protocols: [SwiftSyntax.TypeSyntax],
+        in context: some SwiftSyntaxMacros.MacroExpansionContext
+    ) throws -> [SwiftSyntax.ExtensionDeclSyntax] {
+        var result: [SwiftSyntax.ExtensionDeclSyntax] = []
+        
+        let mustConformeToService = protocols.contains { proto in
+            proto.trimmedDescription == "Service" || proto.trimmedDescription == "ETBDependencyInjection.Service"
+        }
+        if mustConformeToService {
+            let serviceExt: ExtensionDeclSyntax = try ExtensionDeclSyntax("extension \(type): ETBDependencyInjection.Service {}")
+            result.append(serviceExt)
+        }
+        
+        return result
+    }
+    
+}
+
 @main
 struct ETBDependencyInjectionPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [

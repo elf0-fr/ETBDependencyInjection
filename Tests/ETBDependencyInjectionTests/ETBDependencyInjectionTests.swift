@@ -2,6 +2,7 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
+import SwiftSyntaxMacroExpansion
 import XCTest
 
 // Macro implementations build for the host, so the corresponding module is not available when cross-compiling. Cross-compiled tests may still make use of the macro itself in end-to-end tests.
@@ -10,6 +11,9 @@ import ETBDependencyInjectionMacros
 
 let testMacros: [String: Macro.Type] = [
     "Service": ServiceMacro.self,
+]
+let macroSpecs: [String: MacroSpec] = [
+    "Service": MacroSpec(type: ServiceMacro.self, conformances: ["Service"])
 ]
 #endif
 
@@ -124,6 +128,30 @@ final class ETBDependencyInjectionTests: XCTestCase {
             }
             """,
             macros: testMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testNotConformingToService() throws {
+        #if canImport(ETBDependencyInjectionMacros)
+        assertMacroExpansion(
+            """
+            @Service(MyServiceImpl.self)
+            class MyServiceImpl {
+            }
+            """,
+            expandedSource: """
+            class MyServiceImpl {
+            
+                typealias Interface = MyServiceImpl
+            }
+            
+            extension MyServiceImpl: ETBDependencyInjection.Service {
+            }
+            """,
+            macroSpecs: macroSpecs
         )
         #else
         throw XCTSkip("macros are only supported when running tests for the host platform")
