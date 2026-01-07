@@ -31,9 +31,7 @@ final class ETBDependencyInjectionTests: XCTestCase {
                 required init(provider: any ServiceProvider) {
                     
                 }
-            }
-
-            extension MyServiceImpl {
+            
                 typealias Interface = MyServiceImpl
             }
             """,
@@ -51,7 +49,7 @@ final class ETBDependencyInjectionTests: XCTestCase {
             protocol MyService: Service {}
 
             @Service(MyService.self)
-            class MyServiceImpl2: MyService {
+            class MyServiceImpl: MyService {
                 required init(provider: any ServiceProvider) {
                     
                 }
@@ -59,15 +57,70 @@ final class ETBDependencyInjectionTests: XCTestCase {
             """,
             expandedSource: """
             protocol MyService: Service {}
-
-            class MyServiceImpl2: MyService {
+            class MyServiceImpl: MyService {
                 required init(provider: any ServiceProvider) {
                     
                 }
-            }
-
-            extension MyServiceImpl2 {
+            
                 typealias Interface = MyService
+            }
+            """,
+            macros: testMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testAlreadyConformDirectlyToService() throws {
+        #if canImport(ETBDependencyInjectionMacros)
+        assertMacroExpansion(
+            """
+            @Service(MyServiceImpl.self)
+            class MyServiceImpl: Service {
+                required init(provider: any ServiceProvider) {
+                    
+                }
+            
+                typealias Interface = MyServiceImpl
+            }
+            """,
+            expandedSource: """
+            
+            class MyServiceImpl: Service {
+                required init(provider: any ServiceProvider) {
+                    
+                }
+            
+                typealias Interface = MyServiceImpl
+            }
+            """,
+            macros: testMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testPublicClass() throws {
+        #if canImport(ETBDependencyInjectionMacros)
+        assertMacroExpansion(
+            """
+            @Service(MyServiceImpl.self)
+            public class MyServiceImpl: Service {
+                public required init(provider: any ServiceProvider) {
+                    
+                }
+            }
+            """,
+            expandedSource: """
+            
+            public class MyServiceImpl: Service {
+                public required init(provider: any ServiceProvider) {
+                    
+                }
+            
+                public typealias Interface = MyServiceImpl
             }
             """,
             macros: testMacros

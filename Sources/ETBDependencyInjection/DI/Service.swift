@@ -1,9 +1,7 @@
 
-public protocol Service {
+public protocol Service: Injectable {
     
     associatedtype Interface
-    
-    init(provider: any ServiceProvider)
     
     static func initialization(provider: any ServiceProvider) -> Interface
     
