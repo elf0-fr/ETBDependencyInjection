@@ -15,46 +15,19 @@ public struct InjectionMacro: PeerMacro {
             return []
         }
         
-        guard let (name, type, isAny) = getPropertyAttribute() else {
+        guard let (name, type, isAny) = getPropertyAttribute(varDecl: varDecl) else {
             return []
         }
-        let peerDecl: DeclSyntax
-        if isAny {
-            peerDecl = "private var \(raw: name)_Injection: (any \(raw: type))?"
-        } else {
-            peerDecl = "private var \(raw: name)_Injection: \(raw: type)?"
-        }
+        
+        let peerDecl: DeclSyntax = {
+            if isAny {
+                "private var \(raw: name)_Injection: (any \(raw: type))?"
+            } else {
+                "private var \(raw: name)_Injection: \(raw: type)?"
+            }
+        }()
         
         return [peerDecl]
-        
-        func getPropertyAttribute() -> (name: String, type: String, isAny: Bool)? {
-            var name: String = ""
-            var isAny: Bool = false
-            var type: String = ""
-            for binding in varDecl.bindings {
-                guard let identifierPattern = IdentifierPatternSyntax(binding.pattern),
-                      let identifier = Identifier(identifierPattern.identifier),
-                      let typeAnnotation = binding.typeAnnotation else {
-                    continue
-                }
-                name = identifier.name
-                
-                if let someOrAny = SomeOrAnyTypeSyntax(typeAnnotation.type),
-                   let identifierType = IdentifierTypeSyntax(someOrAny.constraint),
-                   let identifier = Identifier(identifierType.name) {
-                    guard someOrAny.someOrAnySpecifier.text == "any" else {
-                        // TODO: handle error
-                        return nil
-                    }
-                    isAny = true
-                    type = identifier.name
-                }
-                
-                return (name, type, isAny)
-            }
-            
-            return nil
-        }
     }
     
 }
@@ -70,16 +43,23 @@ extension InjectionMacro: AccessorMacro {
             return []
         }
         
-        guard let name = getPropertyName() else {
+        guard let (name, type, isAny) = getPropertyAttribute(varDecl: varDecl) else {
             return []
         }
-        
+
         let injectionName = "\(name)_Injection"
+        let resolve: DeclSyntax = {
+            if isAny {
+                "provider?.resolveRequired((any \(raw: type)).self)"
+            } else {
+                "provider?.resolveRequired(\(raw: type).self)"
+            }
+        }()
         
         let get: AccessorDeclSyntax = """
             get {
                 if \(raw: injectionName) == nil {
-            
+                    \(raw: injectionName) = \(raw: resolve)
                 }
             
                 if let \(raw: injectionName) {
@@ -96,17 +76,37 @@ extension InjectionMacro: AccessorMacro {
             """
         
         return [get, set]
-        
-        func getPropertyName() -> String? {
-            for binding in varDecl.bindings {
-                guard let identifierPattern = IdentifierPatternSyntax(binding.pattern),
-                      let identifier = Identifier(identifierPattern.identifier) else {
-                    continue
-                }
-                return identifier.name
-            }
-            return nil
-        }
     }
     
+}
+
+extension InjectionMacro {
+    static func getPropertyAttribute(varDecl: VariableDeclSyntax) -> (name: String, type: String, isAny: Bool)? {
+        var name: String = ""
+        var isAny: Bool = false
+        var type: String = ""
+        for binding in varDecl.bindings {
+            guard let identifierPattern = IdentifierPatternSyntax(binding.pattern),
+                  let identifier = Identifier(identifierPattern.identifier),
+                  let typeAnnotation = binding.typeAnnotation else {
+                continue
+            }
+            name = identifier.name
+            
+            if let someOrAny = SomeOrAnyTypeSyntax(typeAnnotation.type),
+               let identifierType = IdentifierTypeSyntax(someOrAny.constraint),
+               let identifier = Identifier(identifierType.name) {
+                guard someOrAny.someOrAnySpecifier.text == "any" else {
+                    // TODO: handle error
+                    return nil
+                }
+                isAny = true
+                type = identifier.name
+            }
+            
+            return (name, type, isAny)
+        }
+        
+        return nil
+    }
 }
