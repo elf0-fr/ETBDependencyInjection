@@ -24,17 +24,11 @@ final class Test_ServiceMacro: XCTestCase {
             """
             @Service(MyServiceImpl.self)
             class MyServiceImpl: Service {
-                required init(provider: any ServiceProvider) {
-                    
-                }
             }
             """,
             expandedSource: """
             
             class MyServiceImpl: Service {
-                required init(provider: any ServiceProvider) {
-                    
-                }
             
                 typealias Interface = MyServiceImpl
             }
@@ -54,17 +48,11 @@ final class Test_ServiceMacro: XCTestCase {
 
             @Service(MyService.self)
             class MyServiceImpl: MyService {
-                required init(provider: any ServiceProvider) {
-                    
-                }
             }
             """,
             expandedSource: """
             protocol MyService: Service {}
             class MyServiceImpl: MyService {
-                required init(provider: any ServiceProvider) {
-                    
-                }
             
                 typealias Interface = MyService
             }
@@ -82,9 +70,6 @@ final class Test_ServiceMacro: XCTestCase {
             """
             @Service(MyServiceImpl.self)
             class MyServiceImpl: Service {
-                required init(provider: any ServiceProvider) {
-                    
-                }
             
                 typealias Interface = MyServiceImpl
             }
@@ -92,9 +77,6 @@ final class Test_ServiceMacro: XCTestCase {
             expandedSource: """
             
             class MyServiceImpl: Service {
-                required init(provider: any ServiceProvider) {
-                    
-                }
             
                 typealias Interface = MyServiceImpl
             }
@@ -112,17 +94,11 @@ final class Test_ServiceMacro: XCTestCase {
             """
             @Service(MyServiceImpl.self)
             public class MyServiceImpl: Service {
-                public required init(provider: any ServiceProvider) {
-                    
-                }
             }
             """,
             expandedSource: """
             
             public class MyServiceImpl: Service {
-                public required init(provider: any ServiceProvider) {
-                    
-                }
             
                 public typealias Interface = MyServiceImpl
             }
