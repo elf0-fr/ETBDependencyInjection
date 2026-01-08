@@ -3,8 +3,8 @@
 @attached(member, names: named(Interface))
 public macro Service<Service>(_ serviceType: Service) = #externalMacro(module: "ETBDependencyInjectionMacros", type: "ServiceMacro")
 
-@attached(accessor)
-@attached(memberAttribute)
+@attached(extension, conformances: ETBDependencyInjection.Injectable)
+//@attached(memberAttribute)
 public macro Injectable() = #externalMacro(module: "ETBDependencyInjectionMacros", type: "InjectableMacro")
 
 @attached(peer, names: suffixed(_Injection))

@@ -71,7 +71,8 @@ public class MyServiceImpl5 {
 
 // MARK: 6
 @Observable
-class ViewModel: Injectable {
+@Injectable
+class ViewModel {
     
     @Injection @ObservationIgnored var service: any MyService
     @Injection @ObservationIgnored var service2: any Service
@@ -81,4 +82,5 @@ class ViewModel: Injectable {
     public required init(provider: any ServiceProvider) {
         self.provider = provider
     }
+    
 }

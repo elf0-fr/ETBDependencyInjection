@@ -5,6 +5,7 @@ import SwiftSyntaxMacros
 struct ETBDependencyInjectionPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         ServiceMacro.self,
-        InjectionMacro.self
+        InjectionMacro.self,
+        InjectableMacro.self
     ]
 }

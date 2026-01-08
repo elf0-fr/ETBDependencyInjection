@@ -14,7 +14,7 @@ fileprivate let testMacros: [String: Macro.Type] = [
 ]
 #endif
 
-final class Test_InjectableMacro: XCTestCase {
+final class Test_InjectionMacro: XCTestCase {
     func testInjectionWithoutInjectable() throws {
         #if canImport(ETBDependencyInjectionMacros)
         assertMacroExpansion(
@@ -29,7 +29,7 @@ final class Test_InjectableMacro: XCTestCase {
                 var service: any Service1 {
                     get {
                         if service_Injection == nil {
-
+                            service_Injection = provider?.resolveRequired((any Service1).self)
                         }
 
                         if let service_Injection {
