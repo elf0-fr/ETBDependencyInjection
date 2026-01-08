@@ -9,15 +9,15 @@ import XCTest
 #if canImport(ETBDependencyInjectionMacros)
 import ETBDependencyInjectionMacros
 
-let testMacros: [String: Macro.Type] = [
+fileprivate let testMacros: [String: Macro.Type] = [
     "Service": ServiceMacro.self,
 ]
-let macroSpecs: [String: MacroSpec] = [
+fileprivate let macroSpecs: [String: MacroSpec] = [
     "Service": MacroSpec(type: ServiceMacro.self, conformances: ["Service"])
 ]
 #endif
 
-final class ETBDependencyInjectionTests: XCTestCase {
+final class Test_ServiceMacro: XCTestCase {
     func testConformDirectlyToService() throws {
         #if canImport(ETBDependencyInjectionMacros)
         assertMacroExpansion(
