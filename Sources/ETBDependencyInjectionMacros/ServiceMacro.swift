@@ -97,10 +97,3 @@ extension ServiceMacro: ExtensionMacro {
     }
     
 }
-
-@main
-struct ETBDependencyInjectionPlugin: CompilerPlugin {
-    let providingMacros: [Macro.Type] = [
-        ServiceMacro.self,
-    ]
-}

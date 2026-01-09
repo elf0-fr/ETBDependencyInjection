@@ -9,32 +9,26 @@ import XCTest
 #if canImport(ETBDependencyInjectionMacros)
 import ETBDependencyInjectionMacros
 
-let testMacros: [String: Macro.Type] = [
+fileprivate let testMacros: [String: Macro.Type] = [
     "Service": ServiceMacro.self,
 ]
-let macroSpecs: [String: MacroSpec] = [
+fileprivate let macroSpecs: [String: MacroSpec] = [
     "Service": MacroSpec(type: ServiceMacro.self, conformances: ["Service"])
 ]
 #endif
 
-final class ETBDependencyInjectionTests: XCTestCase {
+final class Test_ServiceMacro: XCTestCase {
     func testConformDirectlyToService() throws {
         #if canImport(ETBDependencyInjectionMacros)
         assertMacroExpansion(
             """
             @Service(MyServiceImpl.self)
             class MyServiceImpl: Service {
-                required init(provider: any ServiceProvider) {
-                    
-                }
             }
             """,
             expandedSource: """
             
             class MyServiceImpl: Service {
-                required init(provider: any ServiceProvider) {
-                    
-                }
             
                 typealias Interface = MyServiceImpl
             }
@@ -54,17 +48,11 @@ final class ETBDependencyInjectionTests: XCTestCase {
 
             @Service(MyService.self)
             class MyServiceImpl: MyService {
-                required init(provider: any ServiceProvider) {
-                    
-                }
             }
             """,
             expandedSource: """
             protocol MyService: Service {}
             class MyServiceImpl: MyService {
-                required init(provider: any ServiceProvider) {
-                    
-                }
             
                 typealias Interface = MyService
             }
@@ -82,9 +70,6 @@ final class ETBDependencyInjectionTests: XCTestCase {
             """
             @Service(MyServiceImpl.self)
             class MyServiceImpl: Service {
-                required init(provider: any ServiceProvider) {
-                    
-                }
             
                 typealias Interface = MyServiceImpl
             }
@@ -92,9 +77,6 @@ final class ETBDependencyInjectionTests: XCTestCase {
             expandedSource: """
             
             class MyServiceImpl: Service {
-                required init(provider: any ServiceProvider) {
-                    
-                }
             
                 typealias Interface = MyServiceImpl
             }
@@ -112,17 +94,11 @@ final class ETBDependencyInjectionTests: XCTestCase {
             """
             @Service(MyServiceImpl.self)
             public class MyServiceImpl: Service {
-                public required init(provider: any ServiceProvider) {
-                    
-                }
             }
             """,
             expandedSource: """
             
             public class MyServiceImpl: Service {
-                public required init(provider: any ServiceProvider) {
-                    
-                }
             
                 public typealias Interface = MyServiceImpl
             }
