@@ -18,7 +18,7 @@ fileprivate let macroSpecs: [String: MacroSpec] = [
 #endif
 
 final class Test_InjectableMacro: XCTestCase {
-    func testNotConformingToService() throws {
+    func testNotConformingTo() throws {
         #if canImport(ETBDependencyInjectionMacros)
         assertMacroExpansion(
             """
@@ -34,6 +34,26 @@ final class Test_InjectableMacro: XCTestCase {
             }
             """,
             macroSpecs: macroSpecs
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testConformingTo() throws {
+        #if canImport(ETBDependencyInjectionMacros)
+        assertMacroExpansion(
+            """
+            @Injectable
+            class MyClass: Injectable {
+            }
+            """,
+            expandedSource: """
+            
+            class MyClass: Injectable {
+            }
+            """,
+            macros: testMacros
         )
         #else
         throw XCTSkip("macros are only supported when running tests for the host platform")
