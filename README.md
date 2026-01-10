@@ -11,9 +11,41 @@ ETBDependencyInjection is a Swift Package that provides a Swift macro-driven app
 - Non-invasive: If a property is already initialized or overridden, the macro does nothing.
 - Testable by design: Swap providers or register test doubles in your tests.
 
-### Example
+## Requirements
+- Swift 6.2 or later (the package uses swift-tools-version: 6.2)
+- Platforms:
+    - macOS 14+
+    - iOS 17+
+    - tvOS 17+
+    - watchOS 10+
+    - macCatalyst 17+
+
+## Installation
+### Xcode
+  1. In Xcode, go to File > Add Package Dependencies…
+  2. Enter the package URL: `https://github.com/elf0-fr/ETBDependencyInjection.git`
+  3. Add the `ETBDependencyInjection` product to your target.
+
+### Swift Package Manager (Package.swift)
+Add the package to your dependencies and link the ETBDependencyInjection product to your target:
+  ```swift
+  // In Package.swift
+  dependencies: [
+      .package(url: "https://github.com/elf0-fr/ETBDependencyInjection.git", from: "1.0.0")
+  ],
+  targets: [
+      .target(
+          name: "YourTarget",
+          dependencies: [
+              .product(name: "ETBDependencyInjection", package: "ETBDependencyInjection")
+          ]
+      )
+  ]
+  ```
+
+# Example
+Add a concrete implementation for the protocols
 ```swift
-// Add a concrete implementation for the protocols
 public final class ContainerImp: Container {
     // Your implementation or delegation to a DI framework
 }
@@ -23,11 +55,10 @@ public final class ServiceCollectionImp: ServiceCollection {
 public final class ServiceProviderImp: ServiceProvider {
     // Your implementation or delegation to a DI framework
 }
+```
 
-
-
-
-// Declare a service contract
+Declare a service contract
+```swift
 protocol MyService {
     func doWork() -> String
 }
@@ -47,11 +78,10 @@ class MyServiceImp: MyService {
 
     func doWork() -> String { "Done" }
 }
+```
 
-
-
-
-// Create the container, register the services, build and share the provider with the views (example API)
+Create the container, register the services, build and share the provider with the views (example API)
+```swift
 @main
 struct YourApp: App {
     @State private var provider: ServiceProvider
@@ -77,11 +107,12 @@ struct YourApp: App {
         YourView(provider: provider)
     }
 }
+```
 
 
 
-
-// Consume the dependency
+Consume the dependency
+```swift
 @Injectable
 class ViewModel {
     // Resolve dependency
@@ -112,3 +143,4 @@ class ViewModel {
 
     // ...
 }
+```
