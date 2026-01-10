@@ -18,6 +18,7 @@ fileprivate let macroSpecs: [String: MacroSpec] = [
 #endif
 
 final class Test_ServiceMacro: XCTestCase {
+    
     func testConformDirectlyToService() throws {
         #if canImport(ETBDependencyInjectionMacros)
         assertMacroExpansion(
@@ -131,4 +132,5 @@ final class Test_ServiceMacro: XCTestCase {
         throw XCTSkip("macros are only supported when running tests for the host platform")
         #endif
     }
+    
 }
