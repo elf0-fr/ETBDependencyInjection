@@ -121,7 +121,7 @@ extension InjectionMacro {
     
     static func peerInjectionName(from name: IdentifierPatternSyntax) -> TokenSyntax {
         """
-        \(name)_Injection
+        _injection_\(name)
         """
     }
     
