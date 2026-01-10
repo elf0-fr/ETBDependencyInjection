@@ -43,9 +43,9 @@ Add the package to your dependencies and link the ETBDependencyInjection product
   ]
   ```
 
-### Example
+# Example
+Add a concrete implementation for the protocols
 ```swift
-// Add a concrete implementation for the protocols
 public final class ContainerImp: Container {
     // Your implementation or delegation to a DI framework
 }
@@ -55,11 +55,10 @@ public final class ServiceCollectionImp: ServiceCollection {
 public final class ServiceProviderImp: ServiceProvider {
     // Your implementation or delegation to a DI framework
 }
+```
 
-
-
-
-// Declare a service contract
+Declare a service contract
+```swift
 protocol MyService {
     func doWork() -> String
 }
@@ -79,11 +78,10 @@ class MyServiceImp: MyService {
 
     func doWork() -> String { "Done" }
 }
+```
 
-
-
-
-// Create the container, register the services, build and share the provider with the views (example API)
+Create the container, register the services, build and share the provider with the views (example API)
+```swift
 @main
 struct YourApp: App {
     @State private var provider: ServiceProvider
@@ -109,11 +107,12 @@ struct YourApp: App {
         YourView(provider: provider)
     }
 }
+```
 
 
 
-
-// Consume the dependency
+Consume the dependency
+```swift
 @Injectable
 class ViewModel {
     // Resolve dependency
@@ -144,3 +143,4 @@ class ViewModel {
 
     // ...
 }
+```
