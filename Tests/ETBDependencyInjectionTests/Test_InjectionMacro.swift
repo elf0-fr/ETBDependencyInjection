@@ -29,18 +29,18 @@ final class Test_InjectionMacro: XCTestCase {
                     get {
 
 
-                        if let service_Injection {
-                            return service_Injection
+                        if let _injection_service {
+                            return _injection_service
                         } else {
                             fatalError()
                         }
                     }
                     set {
-                        service_Injection = newValue
+                        _injection_service = newValue
                     }
                 }
 
-                private var service_Injection: (any Service1)?
+                private var _injection_service: (any Service1)?
             }
             """,
             macros: testMacros
@@ -64,22 +64,22 @@ final class Test_InjectionMacro: XCTestCase {
             class MyServiceReader {
                 var service: any Service1 {
                     get {
-                        if service_Injection == nil {
-                        service_Injection = provider?.resolveRequired((any Service1).self)
+                        if _injection_service == nil {
+                        _injection_service = provider?.resolveRequired((any Service1).self)
                         }
 
-                        if let service_Injection {
-                            return service_Injection
+                        if let _injection_service {
+                            return _injection_service
                         } else {
                             fatalError()
                         }
                     }
                     set {
-                        service_Injection = newValue
+                        _injection_service = newValue
                     }
                 }
 
-                private var service_Injection: (any Service1)?
+                private var _injection_service: (any Service1)?
             }
             """,
             macros: testMacros
