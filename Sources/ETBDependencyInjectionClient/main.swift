@@ -84,3 +84,14 @@ class ViewModel {
     }
     
 }
+
+class ViewModel2 {
+    
+    @Injection var service: any MyService
+
+    var provider: (any ServiceProvider)?
+    
+    public required init(provider: any ServiceProvider) {
+        self.provider = provider
+    }
+}

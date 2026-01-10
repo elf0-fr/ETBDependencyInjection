@@ -21,15 +21,51 @@ final class Test_InjectionMacro: XCTestCase {
             """
             class MyServiceReader {
                 @Injection var service: any Service1
-                let name: String
             }
             """,
             expandedSource: """
             class MyServiceReader {
                 var service: any Service1 {
                     get {
+
+
+                        if let service_Injection {
+                            return service_Injection
+                        } else {
+                            fatalError()
+                        }
+                    }
+                    set {
+                        service_Injection = newValue
+                    }
+                }
+
+                private var service_Injection: (any Service1)?
+            }
+            """,
+            macros: testMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testInjectionWithInjectableMacro() throws {
+        #if canImport(ETBDependencyInjectionMacros)
+        assertMacroExpansion(
+            """
+            @Injectable
+            class MyServiceReader {
+                @Injection var service: any Service1
+            }
+            """,
+            expandedSource: """
+            @Injectable
+            class MyServiceReader {
+                var service: any Service1 {
+                    get {
                         if service_Injection == nil {
-                            service_Injection = provider?.resolveRequired((any Service1).self)
+                        service_Injection = provider?.resolveRequired((any Service1).self)
                         }
 
                         if let service_Injection {
@@ -44,7 +80,6 @@ final class Test_InjectionMacro: XCTestCase {
                 }
 
                 private var service_Injection: (any Service1)?
-                let name: String
             }
             """,
             macros: testMacros
