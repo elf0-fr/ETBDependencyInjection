@@ -15,7 +15,8 @@ fileprivate let testMacros: [String: Macro.Type] = [
 #endif
 
 final class Test_InjectionMacro: XCTestCase {
-    func testInjectionWithoutInjectable() throws {
+    
+    func testInjectionWithoutInjectableNotService() throws {
         #if canImport(ETBDependencyInjectionMacros)
         assertMacroExpansion(
             """
@@ -88,4 +89,44 @@ final class Test_InjectionMacro: XCTestCase {
         throw XCTSkip("macros are only supported when running tests for the host platform")
         #endif
     }
+    
+    func testInjectionWithServiceMacro() throws {
+        #if canImport(ETBDependencyInjectionMacros)
+        assertMacroExpansion(
+            """
+            @Service
+            class MyServiceReader {
+                @Injection var service: any Service1
+            }
+            """,
+            expandedSource: """
+            @Service
+            class MyServiceReader {
+                var service: any Service1 {
+                    get {
+                        if _injection_service == nil {
+                        _injection_service = provider?.resolveRequired((any Service1).self)
+                        }
+
+                        if let _injection_service {
+                            return _injection_service
+                        } else {
+                            fatalError()
+                        }
+                    }
+                    set {
+                        _injection_service = newValue
+                    }
+                }
+
+                private var _injection_service: (any Service1)?
+            }
+            """,
+            macros: testMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
 }

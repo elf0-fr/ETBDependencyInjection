@@ -66,7 +66,7 @@ extension InjectionMacro: AccessorMacro {
             return []
         }
 
-        let conformToInjectableMacro: Bool = {
+        let conformToInjectableOrServiceMacro: Bool = {
             let classDecl = context.lexicalContext.first {
                 ClassDeclSyntax($0) != nil
             }
@@ -76,6 +76,7 @@ extension InjectionMacro: AccessorMacro {
                     if let attributeSyntax = AttributeSyntax($0),
                        let identifierTypeSyntax = IdentifierTypeSyntax(attributeSyntax.attributeName) {
                         return identifierTypeSyntax.name.text == "Injectable" || identifierTypeSyntax.name.text == "ETBDependencyInjection.Injectable"
+                        || identifierTypeSyntax.name.text == "Service" || identifierTypeSyntax.name.text == "ETBDependencyInjection.Service"
                     }
                     return false
                 }
@@ -84,7 +85,7 @@ extension InjectionMacro: AccessorMacro {
             return false
         }()
         let injection: TokenSyntax = {
-            guard conformToInjectableMacro else { return "" }
+            guard conformToInjectableOrServiceMacro else { return "" }
                 
             return """
             if \(peerInjectionName(from: name)) == nil {
