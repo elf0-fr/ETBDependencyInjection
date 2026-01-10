@@ -133,4 +133,52 @@ final class Test_ServiceMacro: XCTestCase {
         #endif
     }
     
+    func testTypeAsArgument() throws {
+        #if canImport(ETBDependencyInjectionMacros)
+        assertMacroExpansion(
+            """
+            @Service(MyService.self)
+            class MyServiceImpl {
+            }
+            """,
+            expandedSource: """
+            class MyServiceImpl {
+            
+                typealias Interface = MyService
+            }
+            
+            extension MyServiceImpl: ETBDependencyInjection.Service {
+            }
+            """,
+            macroSpecs: macroSpecs
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testAnyTypeAsArgument() throws {
+        #if canImport(ETBDependencyInjectionMacros)
+        assertMacroExpansion(
+            """
+            @Service((any MyService).self)
+            class MyServiceImpl {
+            }
+            """,
+            expandedSource: """
+            class MyServiceImpl {
+            
+                typealias Interface = any MyService
+            }
+            
+            extension MyServiceImpl: ETBDependencyInjection.Service {
+            }
+            """,
+            macroSpecs: macroSpecs
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+
 }

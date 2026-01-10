@@ -60,14 +60,29 @@ public struct ServiceMacro: MemberMacro {
             return []
         }
 
-        func extractType(from expr: ExprSyntax) -> TypeSyntax? {
+        func extractType(from expr: ExprSyntax) -> TypeExprSyntax? {
             // Pattern like: SomeType.self
             guard let memberAccess = MemberAccessExprSyntax(expr),
-                  memberAccess.declName.baseName.text == "self",
-                  let base = DeclReferenceExprSyntax(memberAccess.base) else {
+                  let base = memberAccess.base else {
                 return nil
             }
-            return TypeSyntax(IdentifierTypeSyntax(name: base.baseName))
+            
+            if let tuple = TupleExprSyntax(base) {
+                let labelExp = tuple.elements.first {
+                    return TypeExprSyntax($0.expression) != nil
+                }
+                if let type = labelExp?.expression {
+                    return TypeExprSyntax(type)
+                }
+            } else if let declRef = DeclReferenceExprSyntax(base) {
+                let type = IdentifierTypeSyntax(
+                    name: declRef.baseName,
+                    genericArgumentClause: nil
+                )
+                return TypeExprSyntax(type: TypeSyntax(type))
+            }
+            
+            return nil
         }
     }
     
