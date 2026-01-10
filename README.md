@@ -41,7 +41,7 @@ Add the package to your dependencies and link the ETBDependencyInjection product
           ]
       )
   ]
-  ``
+  ```
 
 ### Example
 ```swift
