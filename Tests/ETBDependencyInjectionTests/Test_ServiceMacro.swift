@@ -70,14 +70,12 @@ final class Test_ServiceMacro: XCTestCase {
             """
             @Service(MyServiceImpl.self)
             class MyServiceImpl: Service {
-            
                 typealias Interface = MyServiceImpl
             }
             """,
             expandedSource: """
             
             class MyServiceImpl: Service {
-            
                 typealias Interface = MyServiceImpl
             }
             """,
