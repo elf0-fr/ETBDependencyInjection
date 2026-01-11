@@ -29,7 +29,7 @@ class ViewModel {
 
     var provider: (any ServiceProvider)?
     
-    public required init(provider: any ServiceProvider) {
+    init(provider: any ServiceProvider) {
         self.provider = provider
     }
     

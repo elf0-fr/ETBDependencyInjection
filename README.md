@@ -120,7 +120,9 @@ class ViewModel {
 
     var provider: (any ServiceProvider)?
 
-    required init(provider: any ServiceProvider) {
+    // Unlike Service, Injectable does not require a init(provider:) initializer.
+    // You are free to initialize self.provider as you like.
+    init(provider: any ServiceProvider) {
         self.provider = provider
     }
 

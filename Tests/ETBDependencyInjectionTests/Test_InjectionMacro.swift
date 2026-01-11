@@ -16,7 +16,7 @@ fileprivate let testMacros: [String: Macro.Type] = [
 
 final class Test_InjectionMacro: XCTestCase {
     
-    func testInjectionWithoutInjectableNotService() throws {
+    func testInjectionWithoutInjectableNorService() throws {
         #if canImport(ETBDependencyInjectionMacros)
         assertMacroExpansion(
             """

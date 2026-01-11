@@ -14,7 +14,7 @@
 /// Usage:
 /// - Conform your concrete service to `Service`.
 /// - Choose an `Interface` shape that fits your module boundary (protocol, facade struct, or `Self`).
-/// - Implement `init(provider:)` from `Injectable` to receive dependencies.
+/// - Implement `init(provider:)` to receive dependencies.
 /// - Consumers obtain an instance via `Self.initialization(provider:)`, which returns the `Interface`.
 ///
 /// Example:
@@ -23,13 +23,17 @@
 ///     func fetchCurrentUser() async throws -> User
 /// }
 ///
-/// final class UserService: Service {
+/// final class UserService: UserServiceInterface {
 ///     typealias Interface = UserServiceInterface
+///
+///     var provider: (any ServiceProvider)?
+///
+///     required init(provider: any ServiceProvider) {
+///         self.provider = provider
+///     }
 ///
 ///     // Conform to the interface
 ///     func fetchCurrentUser() async throws -> User { /* ... */ }
-///
-///     // Satisfy Injectable protocol ...
 /// }
 ///
 /// // Elsewhere:
@@ -38,7 +42,7 @@
 ///
 /// Notes:
 /// - If you set `Interface == Self`, ensure the concrete type is what you want to expose publicly.
-/// - The default `initialization(provider:)` implementation constructs `Self` via `Injectable` and
+/// - The default `initialization(provider:)` implementation constructs `Self` and
 ///   force-casts to `Interface`. Ensure your `Interface` choice aligns with the concrete instance
 ///   to avoid runtime casting failures.
 public protocol Service: Injectable {
@@ -74,6 +78,8 @@ public protocol Service: Injectable {
     /// Choose an `Interface` shape that best fits your module boundaries and testing strategy.
     associatedtype Interface
     
+    init(provider: any ServiceProvider)
+
     static func initialization(provider: any ServiceProvider) -> Interface
     
 }
