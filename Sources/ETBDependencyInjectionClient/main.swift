@@ -10,8 +10,6 @@ class MyServiceImpl: MyService {
     
     @Injection var service: any MyService
     
-    var provider: (any ServiceProvider)?
-    
     required init(provider: any ServiceProvider) {
         self.provider = provider
     }

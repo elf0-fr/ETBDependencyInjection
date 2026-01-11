@@ -30,8 +30,10 @@ final class Test_ServiceMacro: XCTestCase {
             expandedSource: """
             
             public class MyServiceImpl: Service {
-            
+
                 public typealias Interface = MyServiceImpl
+
+                public var provider: (any ETBDependencyInjection.ServiceProvider)?
             }
             """,
             macros: testMacros
@@ -50,11 +52,14 @@ final class Test_ServiceMacro: XCTestCase {
             }
             """,
             expandedSource: """
+            
             class MyServiceImpl {
-            
+
                 typealias Interface = MyServiceImpl
+
+                var provider: (any ETBDependencyInjection.ServiceProvider)?
             }
-            
+
             extension MyServiceImpl: ETBDependencyInjection.Service {
             }
             """,
@@ -74,9 +79,12 @@ final class Test_ServiceMacro: XCTestCase {
             }
             """,
             expandedSource: """
-            class MyServiceImpl {
             
+            class MyServiceImpl {
+
                 typealias Interface = MyServiceImpl
+
+                var provider: (any ETBDependencyInjection.ServiceProvider)?
             }
             """,
             macroSpecs: ["Service": MacroSpec(type: ServiceMacro.self, conformances: [])]
@@ -95,9 +103,12 @@ final class Test_ServiceMacro: XCTestCase {
             }
             """,
             expandedSource: """
-            class MyServiceImpl {
             
+            class MyServiceImpl {
+
                 typealias Interface = MyService
+
+                var provider: (any ETBDependencyInjection.ServiceProvider)?
             }
             """,
             macroSpecs: ["Service": MacroSpec(type: ServiceMacro.self, conformances: [])]
@@ -116,7 +127,57 @@ final class Test_ServiceMacro: XCTestCase {
             }
             """,
             expandedSource: """
+            
             class MyServiceImpl {
+
+                typealias Interface = any MyService
+
+                var provider: (any ETBDependencyInjection.ServiceProvider)?
+            }
+            """,
+            macroSpecs: ["Service": MacroSpec(type: ServiceMacro.self, conformances: [])]
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testTypealiasAlreadyPresent() throws {
+        #if canImport(ETBDependencyInjectionMacros)
+        assertMacroExpansion(
+            """
+            @Service((any MyService).self)
+            class MyServiceImpl {
+                typealias Interface = any MyService
+            }
+            """,
+            expandedSource: """
+            
+            class MyServiceImpl {
+                typealias Interface = any MyService
+
+                var provider: (any ETBDependencyInjection.ServiceProvider)?
+            }
+            """,
+            macroSpecs: ["Service": MacroSpec(type: ServiceMacro.self, conformances: [])]
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testProviderAlreadyPresent() throws {
+        #if canImport(ETBDependencyInjectionMacros)
+        assertMacroExpansion(
+            """
+            @Service((any MyService).self)
+            class MyServiceImpl {
+                var provider: (any ServiceProvider)?
+            }
+            """,
+            expandedSource: """
+            class MyServiceImpl {
+                var provider: (any ServiceProvider)?
             
                 typealias Interface = any MyService
             }
@@ -127,5 +188,4 @@ final class Test_ServiceMacro: XCTestCase {
         throw XCTSkip("macros are only supported when running tests for the host platform")
         #endif
     }
-
 }
