@@ -60,6 +60,18 @@ public struct ServiceMacro: MemberMacro {
                 return false
             }
         }
+        let isInitProviderAlreadyPresent: Bool = declaration.memberBlock.members.contains {
+            guard let initializerDeclSyntax = InitializerDeclSyntax($0.decl) else {
+                return false
+            }
+            let parameters = initializerDeclSyntax.signature.parameterClause.parameters
+            guard parameters.count == 1 else {
+                return false
+            }
+            return parameters.contains {
+                $0.firstName.text == "provider"
+            }
+        }
         
         var result: [DeclSyntax] = []
         
@@ -75,6 +87,16 @@ public struct ServiceMacro: MemberMacro {
             let syntax: DeclSyntax =
             """
                 \(raw: isPublic ? "public " : "")var provider: (any ETBDependencyInjection.ServiceProvider)?   
+            """
+            result.append(syntax)
+        }
+        
+        if !isInitProviderAlreadyPresent {
+            let syntax: DeclSyntax =
+            """
+                \(raw: isPublic ? "public " : "")required init(provider: any ETBDependencyInjection.ServiceProvider) {
+                    self.provider = provider
+                }
             """
             result.append(syntax)
         }
