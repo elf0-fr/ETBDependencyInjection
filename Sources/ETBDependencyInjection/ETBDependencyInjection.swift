@@ -6,39 +6,33 @@
 /// - Synthesizes conformance to `ETBDependencyInjection.Service`.
 /// - Generates a nested `Interface` type that represents the service’s public interface
 ///   to be used by dependents (e.g., for injection and mocking).
+/// - Generates a nested `provider: (any ServiceProvider)?` property.
 ///
 /// Parameters:
 /// - serviceType: A marker parameter used to drive the macro expansion. Pass the type you are
-///   annotating (e.g., `Self`) to clearly indicate the service being declared. The value itself
-///   is not used at runtime.
+///   annotating to clearly indicate the service being declared.
 ///
 /// Expansion:
 /// - Attaches an extension that conforms the annotated type to `ETBDependencyInjection.Service`.
 /// - Adds a member named `Interface`, typically a protocol or type alias, representing the service’s
 ///   interface exposed to consumers.
+/// - Adds a member named `provider`.
 ///
 /// Usage:
 /// ```swift
-/// @Service(Self)
+/// @Service(AnalyticsService.self)
 /// final class AnalyticsService {
-///     func track(event: String) { /* ... */ }
+///     typealias Interface = AnalyticsService
+///
+///     var provider: (any ETBDependencyInjection.ServiceProvider)?
 /// }
-///
-/// // The macro generates:
-/// // - extension AnalyticsService: ETBDependencyInjection.Service { /* ... */ }
-/// // - nested `Interface` to be used for injection and mocking.
 /// ```
-///
-/// Notes:
-/// - The shape of the generated `Interface` may depend on the macro’s configuration and your type’s
-///   public API. Refer to ETBDependencyInjectionMacros.ServiceMacro for exact generation details.
-/// - Combine with `@Injectable` on consuming types and `@Injection` on properties to wire dependencies.
 ///
 /// See also:
 /// - `@Injectable` for types that receive dependencies.
 /// - `@Injection` for property wrappers that bind to a service interface.
 @attached(extension, conformances: ETBDependencyInjection.Service)
-@attached(member, names: named(Interface))
+@attached(member, names: named(Interface), named(provider))
 public macro Service<Service>(_ serviceType: Service) = #externalMacro(module: "ETBDependencyInjectionMacros", type: "ServiceMacro")
 
 /// Marks a concrete type as able to receive dependencies via the ETBDependencyInjection system,

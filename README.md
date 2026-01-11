@@ -69,13 +69,15 @@ class MyServiceImp: MyService {
     // Resolve dependency within a service
     @Injection var anotherService: any AnotherService
 
-    // Add protocol conformance:
+    // The service macro will generate what follows,
+    // only if you have not declared yet.
     var provider: (any ServiceProvider)?
 
     required init(provider: any ServiceProvider) {
         self.provider = provider
     }
-
+    
+    // Add your MyService protocol conformance:
     func doWork() -> String { "Done" }
 }
 ```

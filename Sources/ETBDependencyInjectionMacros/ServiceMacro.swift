@@ -49,16 +49,37 @@ public struct ServiceMacro: MemberMacro {
             }
             return false
         }
+        let isProviderAlreadyPresent: Bool = declaration.memberBlock.members.contains {
+            guard let variableDeclSyntax = VariableDeclSyntax($0.decl) else {
+                return false
+            }
+            return variableDeclSyntax.bindings.contains {
+                if let identifierPattern = IdentifierPatternSyntax($0.pattern) {
+                    return identifierPattern.identifier.text == "provider"
+                }
+                return false
+            }
+        }
+        
+        var result: [DeclSyntax] = []
         
         if !isTypeAliasAlreadyPresent {
             let syntax: DeclSyntax =
             """
                 \(raw: isPublic ? "public " : "")typealias Interface = \(interfaceType)   
             """
-            return [syntax]
-        } else {
-            return []
+            result.append(syntax)
         }
+        
+        if !isProviderAlreadyPresent {
+            let syntax: DeclSyntax =
+            """
+                \(raw: isPublic ? "public " : "")var provider: (any ETBDependencyInjection.ServiceProvider)?   
+            """
+            result.append(syntax)
+        }
+        
+        return result
 
         func extractType(from expr: ExprSyntax) -> TypeExprSyntax? {
             // Pattern like: SomeType.self
