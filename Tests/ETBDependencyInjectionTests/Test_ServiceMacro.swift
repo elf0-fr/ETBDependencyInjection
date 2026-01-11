@@ -19,74 +19,6 @@ fileprivate let macroSpecs: [String: MacroSpec] = [
 
 final class Test_ServiceMacro: XCTestCase {
     
-    func testConformDirectlyToService() throws {
-        #if canImport(ETBDependencyInjectionMacros)
-        assertMacroExpansion(
-            """
-            @Service(MyServiceImpl.self)
-            class MyServiceImpl: Service {
-            }
-            """,
-            expandedSource: """
-            
-            class MyServiceImpl: Service {
-            
-                typealias Interface = MyServiceImpl
-            }
-            """,
-            macros: testMacros
-        )
-        #else
-        throw XCTSkip("macros are only supported when running tests for the host platform")
-        #endif
-    }
-    
-    func testConformToSubTypeOfService() throws {
-        #if canImport(ETBDependencyInjectionMacros)
-        assertMacroExpansion(
-            """
-            protocol MyService: Service {}
-
-            @Service(MyService.self)
-            class MyServiceImpl: MyService {
-            }
-            """,
-            expandedSource: """
-            protocol MyService: Service {}
-            class MyServiceImpl: MyService {
-            
-                typealias Interface = MyService
-            }
-            """,
-            macros: testMacros
-        )
-        #else
-        throw XCTSkip("macros are only supported when running tests for the host platform")
-        #endif
-    }
-    
-    func testAlreadyConformDirectlyToService() throws {
-        #if canImport(ETBDependencyInjectionMacros)
-        assertMacroExpansion(
-            """
-            @Service(MyServiceImpl.self)
-            class MyServiceImpl: Service {
-                typealias Interface = MyServiceImpl
-            }
-            """,
-            expandedSource: """
-            
-            class MyServiceImpl: Service {
-                typealias Interface = MyServiceImpl
-            }
-            """,
-            macros: testMacros
-        )
-        #else
-        throw XCTSkip("macros are only supported when running tests for the host platform")
-        #endif
-    }
-    
     func testPublicClass() throws {
         #if canImport(ETBDependencyInjectionMacros)
         assertMacroExpansion(
@@ -126,7 +58,28 @@ final class Test_ServiceMacro: XCTestCase {
             extension MyServiceImpl: ETBDependencyInjection.Service {
             }
             """,
-            macroSpecs: macroSpecs
+            macroSpecs: ["Service": MacroSpec(type: ServiceMacro.self, conformances: ["Service"])]
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testAlreadyConformingToService() throws {
+        #if canImport(ETBDependencyInjectionMacros)
+        assertMacroExpansion(
+            """
+            @Service(MyServiceImpl.self)
+            class MyServiceImpl {
+            }
+            """,
+            expandedSource: """
+            class MyServiceImpl {
+            
+                typealias Interface = MyServiceImpl
+            }
+            """,
+            macroSpecs: ["Service": MacroSpec(type: ServiceMacro.self, conformances: [])]
         )
         #else
         throw XCTSkip("macros are only supported when running tests for the host platform")
@@ -146,11 +99,8 @@ final class Test_ServiceMacro: XCTestCase {
             
                 typealias Interface = MyService
             }
-            
-            extension MyServiceImpl: ETBDependencyInjection.Service {
-            }
             """,
-            macroSpecs: macroSpecs
+            macroSpecs: ["Service": MacroSpec(type: ServiceMacro.self, conformances: [])]
         )
         #else
         throw XCTSkip("macros are only supported when running tests for the host platform")
@@ -170,11 +120,8 @@ final class Test_ServiceMacro: XCTestCase {
             
                 typealias Interface = any MyService
             }
-            
-            extension MyServiceImpl: ETBDependencyInjection.Service {
-            }
             """,
-            macroSpecs: macroSpecs
+            macroSpecs: ["Service": MacroSpec(type: ServiceMacro.self, conformances: [])]
         )
         #else
         throw XCTSkip("macros are only supported when running tests for the host platform")
