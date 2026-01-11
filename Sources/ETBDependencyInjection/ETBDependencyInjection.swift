@@ -32,7 +32,7 @@
 /// - `@Injectable` for types that receive dependencies.
 /// - `@Injection` for property wrappers that bind to a service interface.
 @attached(extension, conformances: ETBDependencyInjection.Service)
-@attached(member, names: named(Interface), named(provider))
+@attached(member, names: named(Interface), named(provider), named(init))
 public macro Service<Service>(_ serviceType: Service) = #externalMacro(module: "ETBDependencyInjectionMacros", type: "ServiceMacro")
 
 /// Marks a concrete type as able to receive dependencies via the ETBDependencyInjection system,
