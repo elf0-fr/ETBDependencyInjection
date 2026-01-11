@@ -23,10 +23,6 @@ public struct ServiceMacro: MemberMacro {
             return []
         }
         
-        let isPublic = declaration.modifiers.contains {
-            return DeclModifierSyntax($0)?.name.text == "public"
-        }
-        
         guard let argumentList = LabeledExprListSyntax(node.arguments),
               argumentList.count == 1,
               let firstArg = argumentList.first else {
@@ -74,11 +70,12 @@ public struct ServiceMacro: MemberMacro {
         }
         
         var result: [DeclSyntax] = []
+        let access = declaration.modifiers.first(where: \.isNeededAccessLevelModifier)
         
         if !isTypeAliasAlreadyPresent {
             let syntax: DeclSyntax =
             """
-                \(raw: isPublic ? "public " : "")typealias Interface = \(interfaceType)   
+                \(access)typealias Interface = \(interfaceType)   
             """
             result.append(syntax)
         }
@@ -86,7 +83,7 @@ public struct ServiceMacro: MemberMacro {
         if !isProviderAlreadyPresent {
             let syntax: DeclSyntax =
             """
-                \(raw: isPublic ? "public " : "")var provider: (any ETBDependencyInjection.ServiceProvider)?   
+                \(access)var provider: (any ETBDependencyInjection.ServiceProvider)?   
             """
             result.append(syntax)
         }
@@ -94,7 +91,7 @@ public struct ServiceMacro: MemberMacro {
         if !isInitProviderAlreadyPresent {
             let syntax: DeclSyntax =
             """
-                \(raw: isPublic ? "public " : "")required init(provider: any ETBDependencyInjection.ServiceProvider) {
+                \(access)required init(provider: any ETBDependencyInjection.ServiceProvider) {
                     self.provider = provider
                 }
             """
