@@ -7,6 +7,7 @@
 /// - Generates a nested `Interface` type that represents the service’s public interface
 ///   to be used by dependents (e.g., for injection and mocking).
 /// - Generates a nested `provider: (any ServiceProvider)?` property.
+/// - Generates a nested `init(provider:)` initializer.
 ///
 /// Parameters:
 /// - serviceType: A marker parameter used to drive the macro expansion. Pass the type you are
@@ -17,6 +18,7 @@
 /// - Adds a member named `Interface`, typically a protocol or type alias, representing the service’s
 ///   interface exposed to consumers.
 /// - Adds a member named `provider`.
+/// - Adds a member named `init(provider:)`
 ///
 /// Usage:
 /// ```swift
@@ -25,6 +27,10 @@
 ///     typealias Interface = AnalyticsService
 ///
 ///     var provider: (any ETBDependencyInjection.ServiceProvider)?
+///
+///     required init(provider: any ETBDependencyInjection.ServiceProvider) {
+///         self.provider = provider
+///     }
 /// }
 /// ```
 ///
