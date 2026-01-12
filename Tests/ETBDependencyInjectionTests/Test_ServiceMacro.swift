@@ -232,6 +232,42 @@ final class Test_ServiceMacro: XCTestCase {
         #endif
     }
     
+    func testProviderAsVarAlreadyPresent() throws {
+        #if canImport(ETBDependencyInjectionMacros)
+        assertMacroExpansion(
+            """
+            @Service((any MyService).self)
+            class MyServiceImpl {
+                var provider: (any ServiceProvider)? {
+                    _provider
+                }
+                var _provider: (any ServiceProvider)?
+            }
+            """,
+            expandedSource: """
+            class MyServiceImpl {
+                var provider: (any ServiceProvider)? {
+                    _provider
+                }
+                var _provider: (any ServiceProvider)?
+
+                typealias Interface = any MyService
+
+                required init(provider: any ETBDependencyInjection.ServiceProvider) {
+                    self.provider = provider
+                }
+
+                init() {
+                }
+            }
+            """,
+            macroSpecs: ["Service": MacroSpec(type: ServiceMacro.self, conformances: [])]
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
     func testInitProviderAlreadyPresent() throws {
         #if canImport(ETBDependencyInjectionMacros)
         assertMacroExpansion(

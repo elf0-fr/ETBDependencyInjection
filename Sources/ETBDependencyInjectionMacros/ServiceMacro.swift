@@ -45,18 +45,6 @@ public struct ServiceMacro: MemberMacro {
             }
             return false
         }
-        let isProviderAlreadyPresent: Bool = declaration.memberBlock.members.contains {
-            guard let variableDeclSyntax = VariableDeclSyntax($0.decl) else {
-                return false
-            }
-            return variableDeclSyntax.bindings.contains {
-                if let identifierPattern = IdentifierPatternSyntax($0.pattern) {
-                    return identifierPattern.identifier.text == "provider"
-                }
-                return false
-            }
-        }
-        
         
         var result: [DeclSyntax] = []
         let access = declaration.modifiers.first(where: \.isNeededAccessLevelModifier)
@@ -69,12 +57,20 @@ public struct ServiceMacro: MemberMacro {
             result.append(syntax)
         }
         
-        if !isProviderAlreadyPresent {
-            let syntax: DeclSyntax =
-            """
-                \(access)var provider: (any ETBDependencyInjection.ServiceProvider)?   
-            """
-            result.append(syntax)
+        if let builtVar = buildProviderVariable(access: access) {
+            let isAlreadyPresent: Bool = declaration.memberBlock.members.contains {
+                guard let variableDeclSyntax = VariableDeclSyntax($0.decl),
+                      variableDeclSyntax.bindingSpecifier.tokenKind == .keyword(.var),
+                      variableDeclSyntax.bindings.count == 1,
+                      let binding = variableDeclSyntax.bindings.first else { return false }
+                guard let pattern = PatternBindingSyntax(binding) else { return false }
+                let variableTrimmedDescription = "var \(PatternBindingSyntax(pattern: pattern.pattern, typeAnnotation: pattern.typeAnnotation).trimmedDescription)"
+                return variableTrimmedDescription == "var provider: (any ServiceProvider)?"
+                || variableTrimmedDescription == "var provider: (any ETBDependencyInjection.ServiceProvider)?"
+            }
+            if !isAlreadyPresent {
+                result.append(DeclSyntax(builtVar))
+            }
         }
         
         if let builtInit = buildInitWithProviderParameter(access: access) {
@@ -125,6 +121,14 @@ public struct ServiceMacro: MemberMacro {
             
             return nil
         }
+    }
+    
+    static func buildProviderVariable(access: DeclModifierListSyntax.Element?) -> VariableDeclSyntax? {
+        let header: SyntaxNodeString =
+        """
+            \(access)var provider: (any ETBDependencyInjection.ServiceProvider)?   
+        """
+        return try? VariableDeclSyntax(header)
     }
     
     static func buildInitWithProviderParameter(access: DeclModifierListSyntax.Element?) -> InitializerDeclSyntax? {
