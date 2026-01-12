@@ -172,7 +172,7 @@ final class Test_ServiceMacro: XCTestCase {
         #endif
     }
     
-    func testTypealiasAlreadyPresent() throws {
+    func testTypeAliasAlreadyPresent() throws {
         #if canImport(ETBDependencyInjectionMacros)
         assertMacroExpansion(
             """

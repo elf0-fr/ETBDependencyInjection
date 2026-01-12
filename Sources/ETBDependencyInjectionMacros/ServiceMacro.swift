@@ -37,24 +37,21 @@ public struct ServiceMacro: MemberMacro {
         guard let interfaceType = extractType(from: firstArg.expression) else {
             return []
         }
-
-        let isTypeAliasAlreadyPresent: Bool = declaration.memberBlock.members.contains {
-            if let typeAliasDecl = TypeAliasDeclSyntax($0.decl),
-               let identifier = Identifier(typeAliasDecl.name) {
-                return identifier.name == "Interface"
-            }
-            return false
-        }
         
         var result: [DeclSyntax] = []
         let access = declaration.modifiers.first(where: \.isNeededAccessLevelModifier)
-        
-        if !isTypeAliasAlreadyPresent {
-            let syntax: DeclSyntax =
-            """
-                \(access)typealias Interface = \(interfaceType)   
-            """
-            result.append(syntax)
+       
+        if let builtTypeAlias = buildTypeAlias(access: access, type: interfaceType) {
+            let isAlreadyPresent: Bool = declaration.memberBlock.members.contains {
+                guard let typeAliasDecl = TypeAliasDeclSyntax($0.decl),
+                   let identifier = Identifier(typeAliasDecl.name) else {
+                    return false
+                }
+                return identifier.name == "Interface"
+            }
+            if !isAlreadyPresent {
+                result.append(DeclSyntax(builtTypeAlias))
+            }
         }
         
         if let builtVar = buildProviderVariable(access: access) {
@@ -88,7 +85,7 @@ public struct ServiceMacro: MemberMacro {
         if let builtInit = buildManualInit(access: access, members: declaration.memberBlock.members) {
             let isAlreadyPresent: Bool = declaration.memberBlock.members.contains {
                 guard let initializerDeclSyntax = InitializerDeclSyntax($0.decl) else { return false }
-                return initializerDeclSyntax.signature.debugDescription == builtInit.signature.debugDescription
+                return initializerDeclSyntax.signature.trimmedDescription == builtInit.signature.trimmedDescription
             }
             if !isAlreadyPresent {
                 result.append(DeclSyntax(builtInit))
@@ -121,6 +118,18 @@ public struct ServiceMacro: MemberMacro {
             
             return nil
         }
+    }
+    
+    static func buildTypeAlias(access: DeclModifierListSyntax.Element?, type: TypeExprSyntax) -> TypeAliasDeclSyntax? {
+        let modifiers: DeclModifierListSyntax = {
+            guard let access else { return [] }
+            return DeclModifierListSyntax { access }
+        }()
+        return TypeAliasDeclSyntax(
+            modifiers: modifiers,
+            name: .identifier("Interface"),
+            initializer: .init(value: type.type)
+        )
     }
     
     static func buildProviderVariable(access: DeclModifierListSyntax.Element?) -> VariableDeclSyntax? {
