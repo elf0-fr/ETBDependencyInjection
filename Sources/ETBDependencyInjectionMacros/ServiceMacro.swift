@@ -98,6 +98,16 @@ public struct ServiceMacro: MemberMacro {
             result.append(syntax)
         }
         
+        if let builtManualInit = buildManualInit(access: access, members: declaration.memberBlock.members) {
+            let isManualInitAlreadyPresent: Bool = declaration.memberBlock.members.contains {
+                guard let initializerDeclSyntax = InitializerDeclSyntax($0.decl) else { return false }
+                return initializerDeclSyntax.signature.debugDescription == builtManualInit.signature.debugDescription
+            }
+            if !isManualInitAlreadyPresent {
+                result.append(DeclSyntax(builtManualInit))
+            }
+        }
+        
         return result
 
         func extractType(from expr: ExprSyntax) -> TypeExprSyntax? {
@@ -123,6 +133,27 @@ public struct ServiceMacro: MemberMacro {
             }
             
             return nil
+        }
+    }
+    
+    static func buildManualInit(
+        access: DeclModifierListSyntax.Element?,
+        members: MemberBlockItemListSyntax
+    ) -> InitializerDeclSyntax? {
+        let injectedVariables: [(name: IdentifierPatternSyntax, type: TypeSyntax)] = members.compactMap {
+            guard let varDecl = VariableDeclSyntax($0.decl),
+                  varDecl.attributes.containsInjectionAttribute() else { return nil }
+            return varDecl.getVariableNameAndType()
+        }
+        let arguments = injectedVariables.map { "\($0.name): \($0.type)"}
+        let header: SyntaxNodeString =
+        """
+            \(access)init(\(raw: arguments.joined(separator: ", ")))
+        """
+        return try? InitializerDeclSyntax(header) {
+            for variable in injectedVariables {
+                "self.\(variable.name) = \(variable.name)"
+            }
         }
     }
     

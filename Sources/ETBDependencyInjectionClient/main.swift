@@ -9,6 +9,8 @@ protocol MyService: Service {}
 class MyServiceImpl: MyService {
     
     @Injection var service: any MyService
+    @Injection var service2: any MyService
+    @ETBDependencyInjection.Injection var service3: any MyService
     
 }
 
