@@ -78,23 +78,23 @@ public struct ServiceMacro: MemberMacro {
         }
         
         if let builtInit = buildInitWithProviderParameter(access: access) {
-            let isInitAlreadyPresent: Bool = declaration.memberBlock.members.contains {
+            let isAlreadyPresent: Bool = declaration.memberBlock.members.contains {
                 guard let initializerDeclSyntax = InitializerDeclSyntax($0.decl) else { return false }
                 let signatureTrimmedDescription = initializerDeclSyntax.signature.trimmedDescription
                 return signatureTrimmedDescription == "(provider: any ServiceProvider)"
                 || signatureTrimmedDescription == "(provider: any ETBDependencyInjection.ServiceProvider)"
             }
-            if !isInitAlreadyPresent {
+            if !isAlreadyPresent {
                 result.append(DeclSyntax(builtInit))
             }
         }
         
         if let builtInit = buildManualInit(access: access, members: declaration.memberBlock.members) {
-            let isInitAlreadyPresent: Bool = declaration.memberBlock.members.contains {
+            let isAlreadyPresent: Bool = declaration.memberBlock.members.contains {
                 guard let initializerDeclSyntax = InitializerDeclSyntax($0.decl) else { return false }
                 return initializerDeclSyntax.signature.debugDescription == builtInit.signature.debugDescription
             }
-            if !isInitAlreadyPresent {
+            if !isAlreadyPresent {
                 result.append(DeclSyntax(builtInit))
             }
         }
