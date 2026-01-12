@@ -163,20 +163,3 @@ extension InjectionMacro {
     }
     
 }
-
-extension VariableDeclSyntax {
-    
-    func getVariableNameAndType() -> (name: IdentifierPatternSyntax, type: TypeSyntax)? {
-        for binding in self.bindings {
-            guard let identifierPattern = IdentifierPatternSyntax(binding.pattern),
-                  let typeAnnotation = binding.typeAnnotation else {
-                continue
-            }
-            
-            return (identifierPattern, typeAnnotation.type)
-        }
-        
-        return nil
-    }
-    
-}
