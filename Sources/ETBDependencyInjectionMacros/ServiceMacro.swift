@@ -56,18 +56,7 @@ public struct ServiceMacro: MemberMacro {
                 return false
             }
         }
-        let isInitProviderAlreadyPresent: Bool = declaration.memberBlock.members.contains {
-            guard let initializerDeclSyntax = InitializerDeclSyntax($0.decl) else {
-                return false
-            }
-            let parameters = initializerDeclSyntax.signature.parameterClause.parameters
-            guard parameters.count == 1 else {
-                return false
-            }
-            return parameters.contains {
-                $0.firstName.text == "provider"
-            }
-        }
+        
         
         var result: [DeclSyntax] = []
         let access = declaration.modifiers.first(where: \.isNeededAccessLevelModifier)
@@ -88,23 +77,25 @@ public struct ServiceMacro: MemberMacro {
             result.append(syntax)
         }
         
-        if !isInitProviderAlreadyPresent {
-            let syntax: DeclSyntax =
-            """
-                \(access)required init(provider: any ETBDependencyInjection.ServiceProvider) {
-                    self.provider = provider
-                }
-            """
-            result.append(syntax)
+        if let builtInit = buildInitWithProviderParameter(access: access) {
+            let isInitAlreadyPresent: Bool = declaration.memberBlock.members.contains {
+                guard let initializerDeclSyntax = InitializerDeclSyntax($0.decl) else { return false }
+                let signatureTrimmedDescription = initializerDeclSyntax.signature.trimmedDescription
+                return signatureTrimmedDescription == "(provider: any ServiceProvider)"
+                || signatureTrimmedDescription == "(provider: any ETBDependencyInjection.ServiceProvider)"
+            }
+            if !isInitAlreadyPresent {
+                result.append(DeclSyntax(builtInit))
+            }
         }
         
-        if let builtManualInit = buildManualInit(access: access, members: declaration.memberBlock.members) {
-            let isManualInitAlreadyPresent: Bool = declaration.memberBlock.members.contains {
+        if let builtInit = buildManualInit(access: access, members: declaration.memberBlock.members) {
+            let isInitAlreadyPresent: Bool = declaration.memberBlock.members.contains {
                 guard let initializerDeclSyntax = InitializerDeclSyntax($0.decl) else { return false }
-                return initializerDeclSyntax.signature.debugDescription == builtManualInit.signature.debugDescription
+                return initializerDeclSyntax.signature.debugDescription == builtInit.signature.debugDescription
             }
-            if !isManualInitAlreadyPresent {
-                result.append(DeclSyntax(builtManualInit))
+            if !isInitAlreadyPresent {
+                result.append(DeclSyntax(builtInit))
             }
         }
         
@@ -133,6 +124,16 @@ public struct ServiceMacro: MemberMacro {
             }
             
             return nil
+        }
+    }
+    
+    static func buildInitWithProviderParameter(access: DeclModifierListSyntax.Element?) -> InitializerDeclSyntax? {
+        let header: SyntaxNodeString =
+        """
+            \(access)required init(provider: any ETBDependencyInjection.ServiceProvider)
+        """
+        return try? InitializerDeclSyntax(header) {
+            "self.provider = provider"
         }
     }
     

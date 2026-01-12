@@ -35,8 +35,8 @@ final class Test_ServiceMacro: XCTestCase {
                 public var provider: (any ETBDependencyInjection.ServiceProvider)?
 
                 public required init(provider: any ETBDependencyInjection.ServiceProvider) {
-                        self.provider = provider
-                    }
+                    self.provider = provider
+                }
 
                 public init() {
                 }
@@ -65,8 +65,8 @@ final class Test_ServiceMacro: XCTestCase {
                 var provider: (any ETBDependencyInjection.ServiceProvider)?
 
                 required init(provider: any ETBDependencyInjection.ServiceProvider) {
-                        self.provider = provider
-                    }
+                    self.provider = provider
+                }
 
                 init() {
                 }
@@ -98,8 +98,8 @@ final class Test_ServiceMacro: XCTestCase {
                 var provider: (any ETBDependencyInjection.ServiceProvider)?
 
                 required init(provider: any ETBDependencyInjection.ServiceProvider) {
-                        self.provider = provider
-                    }
+                    self.provider = provider
+                }
 
                 init() {
                 }
@@ -128,8 +128,8 @@ final class Test_ServiceMacro: XCTestCase {
                 var provider: (any ETBDependencyInjection.ServiceProvider)?
 
                 required init(provider: any ETBDependencyInjection.ServiceProvider) {
-                        self.provider = provider
-                    }
+                    self.provider = provider
+                }
 
                 init() {
                 }
@@ -158,8 +158,8 @@ final class Test_ServiceMacro: XCTestCase {
                 var provider: (any ETBDependencyInjection.ServiceProvider)?
 
                 required init(provider: any ETBDependencyInjection.ServiceProvider) {
-                        self.provider = provider
-                    }
+                    self.provider = provider
+                }
 
                 init() {
                 }
@@ -188,8 +188,8 @@ final class Test_ServiceMacro: XCTestCase {
                 var provider: (any ETBDependencyInjection.ServiceProvider)?
 
                 required init(provider: any ETBDependencyInjection.ServiceProvider) {
-                        self.provider = provider
-                    }
+                    self.provider = provider
+                }
 
                 init() {
                 }
@@ -218,8 +218,8 @@ final class Test_ServiceMacro: XCTestCase {
                 typealias Interface = any MyService
 
                 required init(provider: any ETBDependencyInjection.ServiceProvider) {
-                        self.provider = provider
-                    }
+                    self.provider = provider
+                }
 
                 init() {
                 }
@@ -282,8 +282,8 @@ final class Test_ServiceMacro: XCTestCase {
                 var provider: (any ETBDependencyInjection.ServiceProvider)?
 
                 required init(provider: any ETBDependencyInjection.ServiceProvider) {
-                        self.provider = provider
-                    }
+                    self.provider = provider
+                }
 
                 init(service: any Service) {
                     self.service = service
@@ -317,8 +317,8 @@ final class Test_ServiceMacro: XCTestCase {
                 var provider: (any ETBDependencyInjection.ServiceProvider)?
 
                 required init(provider: any ETBDependencyInjection.ServiceProvider) {
-                        self.provider = provider
-                    }
+                    self.provider = provider
+                }
 
                 init(service: any Service, service2: Service) {
                     self.service = service
@@ -349,7 +349,7 @@ final class Test_ServiceMacro: XCTestCase {
             expandedSource: """
             class MyServiceImpl {
                 @Injection var service: any Service
-            
+
                 init(service: any Service) {
                     self.service = service
                 }
@@ -359,8 +359,8 @@ final class Test_ServiceMacro: XCTestCase {
                 var provider: (any ETBDependencyInjection.ServiceProvider)?
 
                 required init(provider: any ETBDependencyInjection.ServiceProvider) {
-                        self.provider = provider
-                    }
+                    self.provider = provider
+                }
             }
             """,
             macroSpecs: ["Service": MacroSpec(type: ServiceMacro.self, conformances: [])]
@@ -387,7 +387,7 @@ final class Test_ServiceMacro: XCTestCase {
             expandedSource: """
             class MyServiceImpl {
                 @Injection var service: any Service
-            
+
                 init(service: any Service) {
                     self.service = service
                     service.id = 1
@@ -398,8 +398,8 @@ final class Test_ServiceMacro: XCTestCase {
                 var provider: (any ETBDependencyInjection.ServiceProvider)?
 
                 required init(provider: any ETBDependencyInjection.ServiceProvider) {
-                        self.provider = provider
-                    }
+                    self.provider = provider
+                }
             }
             """,
             macroSpecs: ["Service": MacroSpec(type: ServiceMacro.self, conformances: [])]
