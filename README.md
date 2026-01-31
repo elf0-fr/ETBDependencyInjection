@@ -62,23 +62,37 @@ Declare a service contract
 protocol MyService {
     func doWork() -> String
 }
+```
 
-// The Service macro provide Service conformance to concrete implementation
+Apply the Service macro to a service you want to inject in your dependency injection system.
+```swift
 @Service(MyService.self)
 class MyServiceImp: MyService {
     // Resolve dependency within a service
     @Injection var anotherService: any AnotherService
 
-    // The service macro will generate what follows,
-    // only if you have not declared yet.
+    // Add your MyService protocol conformance:
+    func doWork() -> String { anotherService.doAnotherWork() }
+}
+
+// Here is the expanded version
+class MyServiceImp: MyService {
+    // To simplify I did not expand the Injection macro here.
+    @Injection var anotherService: any AnotherService
+
+    typealias Interface = any MyService
+
     var provider: (any ServiceProvider)?
 
     required init(provider: any ServiceProvider) {
         self.provider = provider
     }
+
+    init(anotherService: any AnotherService) {
+        self.anotherService = anotherService
+    }
     
-    // Add your MyService protocol conformance:
-    func doWork() -> String { "Done" }
+    func doWork() -> String { anotherService.doAnotherWork() }
 }
 ```
 
@@ -111,9 +125,7 @@ struct YourApp: App {
 }
 ```
 
-
-
-Consume the dependency
+Consume the dependency. Apply the Injectable macro to an entity that will consume your dependencies but will not be part of it. 
 ```swift
 @Injectable
 class ViewModel {
@@ -146,5 +158,38 @@ class ViewModel {
     @Injection @ObservationIgnored var service: any MyService
 
     // ...
+}
+```
+
+The Injection macro
+```swift
+class MyClass {
+    @Injection var service: any MyService
+
+     var provider: (any ServiceProvider)?
+}
+
+// Here is the expanded version
+class MyClass {
+    var service: any MyService {
+        get {
+            if _injection_service == nil {
+                _injection_service = provider?.resolveRequired((any MyService).self)
+            }
+    
+            if let _injection_service {
+                return _injection_service
+            } else {
+                fatalError()
+            }
+        }
+        set {
+            _injection_service = newValue
+        }
+    }
+    
+    private var _injection_service: (any MyService)?
+
+     var provider: (any ServiceProvider)?
 }
 ```
