@@ -85,7 +85,7 @@ public struct ServiceMacro: MemberMacro {
         if let builtInit = buildManualInit(access: access, members: declaration.memberBlock.members) {
             let isAlreadyPresent: Bool = declaration.memberBlock.members.contains {
                 guard let initializerDeclSyntax = InitializerDeclSyntax($0.decl) else { return false }
-                return initializerDeclSyntax.signature.trimmedDescription == builtInit.signature.trimmedDescription
+                return signaturesMatch(initializerDeclSyntax.signature, builtInit.signature)
             }
             if !isAlreadyPresent {
                 result.append(DeclSyntax(builtInit))
@@ -150,6 +150,24 @@ public struct ServiceMacro: MemberMacro {
         }
     }
     
+    /// Compares two `FunctionSignatureSyntax` parameter-by-parameter
+    /// so that irrelevant whitespace differences (e.g. `service : any Service`
+    /// vs `service: any Service`) do not cause a false mismatch.
+    static func signaturesMatch(
+        _ lhs: FunctionSignatureSyntax,
+        _ rhs: FunctionSignatureSyntax
+    ) -> Bool {
+        let lhsParams = lhs.parameterClause.parameters
+        let rhsParams = rhs.parameterClause.parameters
+        guard lhsParams.count == rhsParams.count else { return false }
+        return zip(lhsParams, rhsParams).allSatisfy { l, r in
+            let firstNamesMatch: Bool = l.firstName.trimmedDescription == r.firstName.trimmedDescription
+            let secondNamesMatch: Bool = l.secondName?.trimmedDescription == r.secondName?.trimmedDescription
+            let typesMatch: Bool = l.type.trimmedDescription == r.type.trimmedDescription
+            return firstNamesMatch && secondNamesMatch && typesMatch
+        }
+    }
+
     static func buildManualInit(
         access: DeclModifierListSyntax.Element?,
         members: MemberBlockItemListSyntax
