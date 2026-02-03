@@ -159,14 +159,15 @@ public struct ServiceMacro: MemberMacro {
                   varDecl.attributes.containsInjectionAttribute() else { return nil }
             return varDecl.getVariableNameAndType()
         }
-        let arguments = injectedVariables.map { "\($0.name): \($0.type)"}
+        
+        let arguments = injectedVariables.map { "\($0.name.trimmedDescription): \($0.type.trimmedDescription)"}
         let header: SyntaxNodeString =
         """
             \(access)init(\(raw: arguments.joined(separator: ", ")))
         """
         return try? InitializerDeclSyntax(header) {
             for variable in injectedVariables {
-                "self.\(variable.name) = \(variable.name)"
+                "self.\(raw: variable.name.trimmedDescription) = \(raw: variable.name.trimmedDescription)"
             }
         }
     }

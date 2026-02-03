@@ -444,4 +444,40 @@ final class Test_ServiceMacro: XCTestCase {
         throw XCTSkip("macros are only supported when running tests for the host platform")
         #endif
     }
+    
+    func testInjectionWithStrangeFormat() throws {
+        #if canImport(ETBDependencyInjectionMacros)
+        assertMacroExpansion(
+            """
+            @Service((any MyService).self)
+            class MyServiceImpl {
+                @Injection var service : any Service
+                @Injection var anotherService : AnotherService
+            }
+            """,
+            expandedSource: """
+            class MyServiceImpl {
+                @Injection var service : any Service
+                @Injection var anotherService : AnotherService
+
+                typealias Interface = any MyService
+
+                var provider: (any ETBDependencyInjection.ServiceProvider)?
+
+                required init(provider: any ETBDependencyInjection.ServiceProvider) {
+                    self.provider = provider
+                }
+
+                init(service: any Service, anotherService: AnotherService) {
+                    self.service = service
+                    self.anotherService = anotherService
+                }
+            }
+            """,
+            macroSpecs: ["Service": MacroSpec(type: ServiceMacro.self, conformances: [])]
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
 }
