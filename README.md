@@ -176,7 +176,7 @@ class MyClass {
             if _injection_service == nil {
                 _injection_service = provider?.resolveRequired((any MyService).self)
             }
-    
+
             if let _injection_service {
                 return _injection_service
             } else {
@@ -187,9 +187,70 @@ class MyClass {
             _injection_service = newValue
         }
     }
-    
+
     private var _injection_service: (any MyService)?
 
      var provider: (any ServiceProvider)?
 }
 ```
+
+## Resolving a concrete implementation
+
+In some cases you need access to the concrete implementation rather than the interface — for example, to configure a mock in a SwiftUI preview. Use `resolveRequired(_:as:)` (or its optional counterpart `resolve(_:as:)`) to resolve a service registered under its interface and cast it to the concrete type in one step.
+
+```swift
+// Resolve the concrete implementation directly
+let mock = provider.resolveRequired(as: MyServiceMock.self)
+
+// You can also specify the interface explicitly
+let mock = provider.resolveRequired((any MyService).self, as: MyServiceMock.self)
+```
+
+This replaces the manual resolve-then-cast pattern:
+```swift
+// Before: verbose manual cast
+let service = provider.resolveRequired((any MyService).self)
+if let mock = service as? MyServiceMock {
+    mock.configure(...)
+}
+
+// After: one-step resolution with concrete type
+let mock = provider.resolveRequired(as: MyServiceMock.self)
+mock.configure(...)
+```
+
+> **Note:** The interface type defaults to `Implementation.Interface.self`, so in most cases you only need to pass the `as:` parameter. The method triggers a `fatalError` if the service is not registered or cannot be cast.
+
+## SwiftUI Preview Bootstrapping
+
+The package provides a `.bootstrap(action:)` view modifier for SwiftUI previews. It displays a `ProgressView` while a setup closure runs, then shows the actual content. This is useful for registering dependencies or configuring mocks before a preview renders.
+
+```swift
+#Preview(traits: .serviceRegistrationPreviewModifier()) {
+
+    @Previewable @Environment(\.provider) var provider
+    @Previewable @State var viewModel: MyScreenViewModel?
+
+    MyScreen()
+        .environment(viewModel)
+        .bootstrap {
+            // Resolve the mock implementation directly thanks to resolveRequired(_:as:)
+            let repository = provider.resolveRequired(as: MyRepositoryMock.self)
+
+            // Configure mock data
+            repository.mockItems = [
+                .init(id: "1", title: "Hello, world!"),
+                .init(id: "2", title: "Hi there!"),
+            ]
+
+            // Create the view model with the configured provider
+            viewModel = .init(provider: provider)
+        }
+}
+```
+
+In this example:
+1. The `serviceRegistrationPreviewModifier` trait creates a `ServiceProvider` with mock implementations registered against their interfaces.
+2. The `.bootstrap { ... }` modifier runs the setup closure once before the view appears.
+3. `resolveRequired(as: MyRepositoryMock.self)` resolves the service registered under its interface and returns it as the concrete mock type, so you can configure it directly without manual casting.
+4. The view model is initialized with the provider and injected via `.environment(...)`.
